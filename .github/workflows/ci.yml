@@ -46,17 +46,17 @@ jobs:
       - name: Run Tests
         run: pytest --alluredir=reports/allure-results  # Save results to the Allure results directory
 
-      # Step 7: Generate the Allure report
+      # Step 7: List Allure Results Directory (for debugging purposes)
+      - name: List Allure Results Directory
+        run: ls -la reports/allure-results  # Ensure the results are generated
+
+      # Step 8: Generate the Allure report
       - name: Generate Allure Report
         run: allure generate reports/allure-results --clean  # Convert results into an HTML report
 
-      # Optional Step 8: Serve the Allure report (useful for local testing or CI environments that support it)
-      - name: Serve Allure Report
-        if: ${{ always() }}  # Optional, will serve the report in the environment
-        run: allure open
-
-      # Step 9: Upload Allure report as an artifact to GitHub Actions
+      # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs)
       - name: Upload Allure Report
+        if: ${{ always() }}  # Ensure this step runs even if tests fail
         uses: actions/upload-artifact@v3
         with:
           name: allure-report
