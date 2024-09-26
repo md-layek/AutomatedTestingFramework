@@ -9,3 +9,8 @@ __pycache__/
 
 # Virtual environment
 venv/
+
+
+
+# Ignore allure-results directory
+reports/allure-results/

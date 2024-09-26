@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: [chromium, firefox, webkit]  # Cross-browser testing
+        browser: [chromium, firefox, webkit]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3  # Updated to use Node.js 16 support
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v3
@@ -26,13 +26,27 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install pytest pytest-playwright allure-pytest
-          playwright install  # This ensures all browsers (Chromium, Firefox, Webkit) are installed
+          playwright install
+
+      - name: Clean Allure Results Directory  # Clean the directory to avoid old results
+        run: rm -rf reports/allure-results/*
+
+      - name: Install Allure CLI
+        run: |
+          sudo apt-add-repository ppa:qameta/allure
+          sudo apt-get update
+          sudo apt-get install allure
 
       - name: Run Tests
-        run: pytest --browser=${{ matrix.browser }} --alluredir=reports/allure-results
+        run: pytest --alluredir=reports/allure-results
 
       - name: Upload Allure Report
-        uses: actions/upload-artifact@v3  # Updated to v3
+        uses: actions/upload-artifact@v3
         with:
           name: allure-report
           path: reports/allure-results
+
+      - name: Generate Allure Report
+        run: |
+          allure generate reports/allure-results --clean
+          allure open
