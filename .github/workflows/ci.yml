@@ -1,4 +1,4 @@
-name: CI
+name: CI Integration with Allure Reporting
 
 on:
   push:
@@ -13,40 +13,51 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [chromium, firefox, webkit]  # Cross-browser testing
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
+      # Step 3: Install dependencies
       - name: Install Dependencies
         run: |
           pip install pytest pytest-playwright allure-pytest
-          playwright install
+          playwright install  # Install all Playwright browsers (Chromium, Firefox, WebKit)
 
-      - name: Clean Allure Results Directory  # Clean the directory to avoid old results
+      # Step 4: Clean up the Allure results directory
+      - name: Clean Allure Results Directory
         run: rm -rf reports/allure-results/*
 
+      # Step 5: Install Allure CLI (for generating and serving the reports)
       - name: Install Allure CLI
         run: |
           sudo apt-add-repository ppa:qameta/allure
           sudo apt-get update
           sudo apt-get install allure
 
+      # Step 6: Run the tests and generate Allure results
       - name: Run Tests
-        run: pytest --alluredir=reports/allure-results
+        run: pytest --alluredir=reports/allure-results  # Save results to the Allure results directory
 
+      # Step 7: Generate the Allure report
+      - name: Generate Allure Report
+        run: allure generate reports/allure-results --clean  # Convert results into an HTML report
+
+      # Optional Step 8: Serve the Allure report (useful for local testing or CI environments that support it)
+      - name: Serve Allure Report
+        if: ${{ always() }}  # Optional, will serve the report in the environment
+        run: allure open
+
+      # Step 9: Upload Allure report as an artifact to GitHub Actions
       - name: Upload Allure Report
         uses: actions/upload-artifact@v3
         with:
           name: allure-report
-          path: reports/allure-results
-
-      - name: Generate Allure Report
-        run: |
-          allure generate reports/allure-results --clean
-          allure open
+          path: reports/allure-results  # Upload the allure-results directory for downloading
