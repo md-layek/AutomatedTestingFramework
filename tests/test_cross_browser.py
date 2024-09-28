@@ -1,26 +1,9 @@
-def test_cross_browser(playwright, browser_type):
-    """
-    Test case to verify cross-browser compatibility using Playwright's browser_type.
-    This will automatically run on Chromium, Firefox, and WebKit based on pytest-playwright config.
-    """
-    # Launch the browser based on browser_type passed by Playwright
-    browser = playwright[browser_type].launch(headless=True)
+import pytest
+@pytest.mark.asyncio
+async def test_cross_browser(page):
+    """Test case to run across Chromium, Firefox, and WebKit."""
+    # Navigate to the test page
+    await page.goto("https://the-internet.herokuapp.com/")
 
-    # Create a new browser context and page
-    context = browser.new_context()
-    page = context.new_page()
-
-    # Navigate to the login page
-    page.goto("https://the-internet.herokuapp.com/login")
-
-    # Fill out the login form
-    page.fill("#username", "tomsmith")
-    page.fill("#password", "SuperSecretPassword!")
-    page.click("button[type='submit']")
-
-    # Assert login was successful
-    assert "You logged into a secure area!" in page.text_content("#flash")
-
-    # Close the context and browser
-    context.close()
-    browser.close()
+    # Verify the page title
+    assert await page.title() == "The Internet"

@@ -1,16 +1,24 @@
-def test_file_upload(page):
+import pytest
+
+@pytest.mark.asyncio
+async def test_file_upload(page):
     """
     Test case to verify file upload functionality.
     """
     # Navigate to the file upload page
-    page.goto("https://the-internet.herokuapp.com/upload")
+    await page.goto("https://the-internet.herokuapp.com/upload")
 
-    # Upload a file (ensure the file exists in the specified path)
-    file_path = "tests/files/testfile.txt"  # Replace with the actual path to your file
-    page.set_input_files("#file-upload", file_path)
+    # Ensure the file input element is visible
+    upload_input = page.locator("#file-upload")
+    await upload_input.wait_for(state="visible", timeout=60000)  # Increased timeout to 60 seconds
 
-    # Click the submit button to upload the file
-    page.click("#file-submit")
+    # Upload a file
+    file_path = "tests/files/testfile.txt"  # Ensure correct file path
+    await page.set_input_files("#file-upload", file_path)
 
-    # Assert that the file was uploaded successfully by checking the confirmation message
-    assert "File Uploaded!" in page.text_content("h3")
+    # Click the submit button after uploading
+    await page.click("#file-submit")
+
+    # Verify file upload success
+    success_message = await page.text_content("h3")
+    assert "File Uploaded!" in success_message

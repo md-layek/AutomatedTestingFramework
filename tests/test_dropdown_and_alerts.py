@@ -1,30 +1,33 @@
-def test_select_dropdown(page):
+import pytest
+
+@pytest.mark.asyncio
+async def test_select_dropdown(page, set_global_timeout):
     """
     Test case to verify dropdown selection.
     """
-    # Navigate to the Dropdown page
-    page.goto("http://the-internet.herokuapp.com/dropdown")
+    # Navigate to the dropdown page
+    await page.goto("http://the-internet.herokuapp.com/dropdown")
 
-    # Select an option from the dropdown
-    page.select_option("select#dropdown", "2")
-
-    # Assert that the correct option was selected
-    selected_option = page.query_selector("select#dropdown option[selected]")
-    assert selected_option.text_content() == "Option 2"
+    # Select an option and verify it was selected
+    await page.select_option("#dropdown", "1")
+    selected_value = await page.input_value("#dropdown")
+    assert selected_value == "1", f"Expected '1' to be selected, but got '{selected_value}'"
 
 
-def test_js_alerts(page):
+@pytest.mark.asyncio
+async def test_js_alerts(page, set_global_timeout):
     """
     Test case to verify handling of JavaScript alerts.
     """
-    # Navigate to the JavaScript Alerts page
-    page.goto("http://the-internet.herokuapp.com/javascript_alerts")
+    # Navigate to the JavaScript alerts page
+    await page.goto("http://the-internet.herokuapp.com/javascript_alerts")
 
-    # Click the button to trigger a JS alert
-    page.click("button[onclick='jsAlert()']")
+    # Trigger a JavaScript alert and accept it
+    async with page.expect_event("dialog") as dialog_info:
+        await page.click("button[onclick='jsAlert()']")
+    alert = await dialog_info.value
+    await alert.accept()
 
-    # Accept the alert
-    page.on("dialog", lambda dialog: dialog.accept())
-
-    # Assert that the alert was accepted successfully
-    assert "You successfully clicked an alert" in page.text_content("#result")
+    # Verify the result message on the page after the alert is accepted
+    result_text = await page.text_content("#result")
+    assert "You successfully clicked an alert" in result_text, f"Unexpected result text: {result_text}"

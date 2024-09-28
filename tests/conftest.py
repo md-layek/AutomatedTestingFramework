@@ -1,24 +1,44 @@
 import pytest
-import os
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 
-@pytest.fixture(scope="session", params=["chromium", "firefox", "webkit"])
-def browser_type(request):
-    """Parameterized fixture to run tests across multiple browsers."""
-    return request.param
-
-@pytest.fixture(scope="session")
-def browser(browser_type):
-    """Launch browser in headless mode by default, but allow non-headless mode locally."""
-    headless = os.getenv("HEADLESS", "true").lower() == "true"  # Headless by default, can be overridden
-    with sync_playwright() as p:
-        browser = getattr(p, browser_type).launch(headless=headless)  # Use headless setting
+@pytest.fixture(scope="function", params=["chromium", "firefox", "webkit"])
+async def browser_type(request):
+    """Launch the browser based on the parameter."""
+    async with async_playwright() as p:
+        browser = await getattr(p, request.param).launch(headless=True)
         yield browser
-        browser.close()
+        await browser.close()
+
+#@pytest.fixture(scope="function")
+#async def page(browser_type):
+    """Create and yield a new page for each test."""
+ #   context = await browser_type.new_context()
+  #  page = await context.new_page()
+   # yield page
+    #await page.close()
+    #await context.close()
+
+
 
 @pytest.fixture(scope="function")
-def page(browser):
+async def page(browser_type):
     """Create and yield a new page for each test."""
-    page = browser.new_page()
-    yield page
-    page.close()
+    try:
+        context = await browser_type.new_context()
+        page = await context.new_page()
+        print("Page successfully created.")
+        yield page
+    except Exception as e:
+        print(f"Error during page creation: {e}")
+    finally:
+        await page.close()
+        await context.close()
+
+
+
+@pytest.fixture(scope="function")
+async def set_global_timeout(page):
+    """Set a default timeout for page actions."""
+    if not page:
+        raise ValueError("The page object is not initialized properly.")
+    await page.set_default_timeout(60000)  # 60 seconds timeout

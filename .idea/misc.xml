@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.12 (automatedsoftwaretesting)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (automatedsoftwaretesting)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (AutomatedTestingFramework)" project-jdk-type="Python SDK" />
 </project>
