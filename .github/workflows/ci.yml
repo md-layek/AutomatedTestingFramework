@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]  # Cross-browser testing
+
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Code
@@ -25,27 +26,27 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Step 3: Install dependencies
+      # Step 3: Install dependencies including pytest-xdist for parallel execution
       - name: Install Dependencies
         run: |
-          pip install pytest pytest-playwright allure-pytest
-          playwright install  # Install Playwright browsers (Chromium, Firefox, WebKit)
+          pip install pytest pytest-playwright allure-pytest pytest-xdist
+          playwright install  # Install all Playwright browsers (Chromium, Firefox, WebKit)
 
-      # Step 4: Ensure Allure Results Directory Exists
-      - name: Create Allure Results Directory
-        run: mkdir -p reports/allure-results
+      # Step 4: Clean up the Allure results directory
+      - name: Clean Allure Results Directory
+        run: rm -rf reports/allure-results/*
 
-      # Step 5: Download and Install Allure CLI
+      # Step 5: Install Allure CLI (for generating and serving the reports)
       - name: Install Allure CLI
         run: |
-          wget https://github.com/allure-framework/allure2/releases/download/2.21.0/allure-2.21.0.tgz
-          tar -zxvf allure-2.21.0.tgz
-          sudo mv allure-2.21.0 /opt/allure
-          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
+          sudo apt-add-repository ppa:qameta/allure
+          sudo apt-get update
+          sudo apt-get install allure
 
       # Step 6: Run the tests and generate Allure results
       - name: Run Tests
-        run: pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }}  # Save results to Allure results directory
+        run: |
+          pytest --alluredir=reports/allure-results -n 4 --browser=${{ matrix.browser }}  # Use parallel testing with pytest-xdist
 
       # Step 7: List Allure Results Directory (for debugging purposes)
       - name: List Allure Results Directory
@@ -53,7 +54,7 @@ jobs:
 
       # Step 8: Generate the Allure report
       - name: Generate Allure Report
-        run: allure generate reports/allure-results --clean -o reports/allure-report  # Convert results into an HTML report
+        run: allure generate reports/allure-results --clean  # Convert results into an HTML report
 
       # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs)
       - name: Upload Allure Report
@@ -61,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: allure-report
-          path: reports/allure-report  # Upload the allure-report directory for downloading
+          path: reports/allure-results  # Upload the allure-results directory for downloading
