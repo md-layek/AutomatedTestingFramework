@@ -14,7 +14,6 @@ jobs:
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]  # Cross-browser testing
-
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Code
@@ -43,10 +42,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install allure
 
-      # Step 6: Run the tests and generate Allure results
+      # Step 6: Run the tests and generate Allure results with headless mode
       - name: Run Tests
         run: |
-          pytest --alluredir=reports/allure-results -n 4 --browser=${{ matrix.browser }}  # Use parallel testing with pytest-xdist
+          pytest --headless --browser=${{ matrix.browser }} --alluredir=reports/allure-results
 
       # Step 7: List Allure Results Directory (for debugging purposes)
       - name: List Allure Results Directory
