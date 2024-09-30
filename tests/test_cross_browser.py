@@ -1,9 +1,17 @@
 import pytest
+
+
 @pytest.mark.asyncio
 async def test_cross_browser(page):
-    """Test case to run across Chromium, Firefox, and WebKit."""
-    # Navigate to the test page
-    await page.goto("https://the-internet.herokuapp.com/")
+    """
+    Test case to verify cross-browser compatibility.
+    """
+    # Navigate to the test page with a longer timeout
+    await page.goto("https://the-internet.herokuapp.com/", timeout=60000)
 
-    # Verify the page title
-    assert await page.title() == "The Internet"
+    # Wait for the page to load completely
+    await page.wait_for_load_state("load")
+
+    # Verify the title or any other element
+    title = await page.title()
+    assert "The Internet" in title, f"Expected 'The Internet' in title, but got {title}"

@@ -1,11 +1,10 @@
+import pytest
 import sys
 import os
 
 # Ensure the 'utils' directory is in the Python path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-import pytest
 
 # Import the reusable login and logout functions
 
@@ -40,3 +39,22 @@ async def test_user_login_failure(page):
 
     # Verify login failure message
     assert "Your username is invalid!" in await page.text_content("div.flash.error")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
