@@ -25,11 +25,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Step 3: Install dependencies including pytest-xdist for parallel execution
+      # Step 3: Install dependencies
       - name: Install Dependencies
         run: |
-          pip install pytest pytest-playwright allure-pytest pytest-xdist
-          playwright install  # Install all Playwright browsers (Chromium, Firefox, WebKit)
+          pip install pytest pytest-playwright allure-pytest
+          playwright install --with-deps  # Install all Playwright browsers and dependencies
 
       # Step 4: Clean up the Allure results directory
       - name: Clean Allure Results Directory
@@ -42,10 +42,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install allure
 
-      # Step 6: Run the tests and generate Allure results with headless mode
+      # Step 6: Run the tests and generate Allure results
       - name: Run Tests
-        run: |
-          pytest --headless --browser=${{ matrix.browser }} --alluredir=reports/allure-results
+        run: pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }}  # Run tests with browser from the matrix
 
       # Step 7: List Allure Results Directory (for debugging purposes)
       - name: List Allure Results Directory
