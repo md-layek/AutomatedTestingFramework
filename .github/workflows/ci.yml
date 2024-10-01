@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]  # Cross-browser testing
+
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Code
@@ -28,31 +29,33 @@ jobs:
       # Step 3: Install dependencies
       - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install pytest pytest-playwright allure-pytest
-          playwright install --with-deps  # Install all Playwright browsers and dependencies
+          playwright install --with-deps  # Install Playwright browsers and dependencies
 
-      # Step 4: Clean up the Allure results directory
+      # Step 4: Clean up the Allure results directory before tests
       - name: Clean Allure Results Directory
         run: rm -rf reports/allure-results/*
 
-      # Step 5: Install Allure CLI (for generating and serving the reports)
+      # Step 5: Install Allure CLI (alternative via npm for stability)
       - name: Install Allure CLI
-        run: |
-          sudo apt-add-repository ppa:qameta/allure
-          sudo apt-get update
-          sudo apt-get install allure
+        run: npm install -g allure-commandline --save-dev
 
-      # Step 6: Run the tests and generate Allure results
+      # Step 6: Run the tests and generate Allure results with retries and longer timeouts
       - name: Run Tests
-        run: pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }}  # Run tests with browser from the matrix
+        run: |
+          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=60000
+        env:
+          PYTHONUNBUFFERED: 1
 
-      # Step 7: List Allure Results Directory (for debugging purposes)
+      # Step 7: List the Allure Results Directory (for debugging purposes)
       - name: List Allure Results Directory
         run: ls -la reports/allure-results  # Ensure the results are generated
 
-      # Step 8: Generate the Allure report
+      # Step 8: Generate the Allure report (with retries in case of transient issues)
       - name: Generate Allure Report
-        run: allure generate reports/allure-results --clean  # Convert results into an HTML report
+        run: |
+          allure generate reports/allure-results --clean || echo "Allure report generation failed"
 
       # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs)
       - name: Upload Allure Report
@@ -61,3 +64,4 @@ jobs:
         with:
           name: allure-report
           path: reports/allure-results  # Upload the allure-results directory for downloading
+

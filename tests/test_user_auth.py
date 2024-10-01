@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import the reusable retry_action, login, and logout functions
-from utils.test_utilities import retry_action, retry_click, login, logout
+from utils.test_utilities import retry_action, login, logout
 
 
 
