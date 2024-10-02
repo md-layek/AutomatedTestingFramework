@@ -18,11 +18,11 @@ jobs:
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Code
-        uses: actions/checkout@v4  # Updated to v4 for Checkout
+        uses: actions/checkout@v4
 
       # Step 2: Set up Python
       - name: Set up Python
-        uses: actions/setup-python@v4  # Updated to v4 for Python setup
+        uses: actions/setup-python@v4
         with:
           python-version: '3.12.2'
 
@@ -37,9 +37,10 @@ jobs:
       - name: Clean Allure Results Directory
         run: rm -rf reports/allure-results/*
 
-      # Step 5: Install Allure CLI via pip
+      # Step 5: Install Allure CLI
       - name: Install Allure CLI
         run: |
+          # Install Allure command-line tool via Python
           python -m pip install allure-commandline
 
       # Step 6: Run the tests and generate Allure results
@@ -62,15 +63,15 @@ jobs:
       # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs)
       - name: Upload Allure Report
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4  # Updated to v4 for artifact upload
+        uses: actions/upload-artifact@v4
         with:
-          name: allure-report-${{ github.run_id }}
+          name: allure-report-${{ github.run_id }}  # Added run_id to avoid conflict
           path: reports/allure-results  # Upload the allure-results directory for downloading
 
       # Step 10: Upload Playwright Screenshots for Debugging
       - name: Upload Playwright Screenshots
         if: ${{ always() }}  # Ensure this runs even if tests fail
-        uses: actions/upload-artifact@v4  # Updated to v4 for artifact upload
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-screenshots-${{ github.run_id }}
+          name: playwright-screenshots-${{ github.run_id }}  # Added run_id to avoid conflict
           path: failure_*.png
