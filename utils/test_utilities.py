@@ -35,22 +35,44 @@ async def retry_action(action, retries=3, delay=2):
 
 
 # Retry logic specifically for clicking elements
-async def retry_click(page, selector: str, retries: int = 3, delay: int = 2):
+# async def retry_click(page, selector: str, retries: int = 3, delay: int = 2):
+#     """
+#     A utility function to retry clicking an element a number of times with delays between retries.
+#     :param page: The Playwright page object.
+#     :param selector: The selector for the element to click.
+#     :param retries: The number of retries before failing.
+#     :param delay: The delay between retries (in seconds).
+#     :raises TimeoutError: If the element is not interactable after the maximum retries.
+#     """
+#     for attempt in range(retries):
+#         try:
+#             await page.click(selector)
+#             return  # Exit if the click succeeds
+#         except TimeoutError as e:
+#             print(f"Attempt {attempt + 1} failed to click '{selector}': {e}")
+#             if attempt < retries - 1:
+#                 await asyncio.sleep(delay)  # Wait before retrying
+#             else:
+#                 raise  # Re-raise the exception if maximum retries are reached
+
+
+
+async def retry_click(page, selector, retries=3, delay=2):
     """
-    A utility function to retry clicking an element a number of times with delays between retries.
-    :param page: The Playwright page object.
-    :param selector: The selector for the element to click.
-    :param retries: The number of retries before failing.
-    :param delay: The delay between retries (in seconds).
-    :raises TimeoutError: If the element is not interactable after the maximum retries.
+    Retries clicking a selector up to 'retries' number of times, with 'delay' seconds between attempts.
     """
     for attempt in range(retries):
         try:
-            await page.click(selector)
-            return  # Exit if the click succeeds
-        except TimeoutError as e:
-            print(f"Attempt {attempt + 1} failed to click '{selector}': {e}")
-            if attempt < retries - 1:
-                await asyncio.sleep(delay)  # Wait before retrying
+            # Wait for the selector to be visible
+            await page.wait_for_selector(selector, state="visible", timeout=60000)
+            # Ensure the element is enabled before clicking
+            if await page.is_enabled(selector):
+                await page.click(selector)
+                return  # Success, exit the function
             else:
-                raise  # Re-raise the exception if maximum retries are reached
+                print(f"Attempt {attempt + 1} failed: Selector is not enabled")
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed: {str(e)}")
+            await asyncio.sleep(delay)
+    raise Exception(f"Failed to click {selector} after {retries} retries")
+
