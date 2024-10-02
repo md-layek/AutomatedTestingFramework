@@ -1,3 +1,4 @@
+import logging
 import pytest
 import sys
 import os
@@ -51,6 +52,30 @@ async def test_user_login_success(page):
 
 
 
+#
+#
+# @pytest.mark.asyncio
+# async def test_user_login_failure(page):
+#     """
+#     Test failed login with invalid credentials.
+#     """
+#     try:
+#         # Navigate to the login page
+#         await page.goto("http://the-internet.herokuapp.com/login", timeout=120000)
+#
+#         # Ensure the login form and submit button are visible before proceeding
+#         await page.wait_for_selector("button[type='submit']", state="visible", timeout=60000)
+#
+#         # Retry the login process if it fails
+#         await retry_click(page, "button[type='submit']")
+#     except Exception:
+#         # Retrieve the browser name for the screenshot file
+#         browser_name = page.context.browser.browser_type.name
+#         # Take a screenshot on failure
+#         await page.screenshot(path=f"failure_login_{browser_name}.png")
+#         raise
+
+
 
 
 @pytest.mark.asyncio
@@ -60,16 +85,20 @@ async def test_user_login_failure(page):
     """
     try:
         # Navigate to the login page
-        await page.goto("http://the-internet.herokuapp.com/login", timeout=60000)
+        await page.goto("http://the-internet.herokuapp.com/login", timeout=120000)
 
         # Ensure the login form and submit button are visible before proceeding
         await page.wait_for_selector("button[type='submit']", state="visible", timeout=60000)
 
         # Retry the login process if it fails
         await retry_click(page, "button[type='submit']")
-    except Exception:
+    except Exception as e:
         # Retrieve the browser name for the screenshot file
         browser_name = page.context.browser.browser_type.name
+
+        # Log the error for debugging purposes
+        logging.error(f"Login test failed on browser: {browser_name}. Error: {str(e)}")
+
         # Take a screenshot on failure
         await page.screenshot(path=f"failure_login_{browser_name}.png")
         raise
