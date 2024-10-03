@@ -1,3 +1,102 @@
+#name: CI Integration with Allure Reporting
+#
+#on:
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
+#
+#jobs:
+#  test:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        browser: [chromium, firefox, webkit]
+#
+#    steps:
+#      # Step 1: Checkout the repository
+#      - name: Checkout Code
+#        uses: actions/checkout@v4
+#
+#      # Step 2: Set up Node.js (to avoid deprecation issues)
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: '20'
+#
+#      # Step 3: Set up Python
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.12.2'
+#
+#      # Step 4: Install Dependencies
+#      - name: Install Dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install pytest pytest-playwright allure-pytest
+#          playwright install --with-deps
+#
+#      # Step 4b: Install Allure CLI
+#      - name: Install Allure CLI
+#        run: |
+#          python -m pip install allure-commandline
+#
+#      # Step 5: Ensure Allure Results Directory exists
+#      - name: Ensure Allure Results Directory
+#        run: mkdir -p reports/allure-results
+#
+#      # Step 6: Run the tests and generate Allure results
+#      - name: Run Tests
+#        run: |
+#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=120000 -vv || true
+#        env:
+#          PYTHONUNBUFFERED: 1
+#
+#      # Step 7: Capture Logs on Failure
+#      - name: Capture Logs on Failure
+#        if: failure()  # This step only runs when the job fails
+#        run: |
+#          echo "Capturing logs after failure..."
+#          cat reports/allure-results || echo "No Allure results found."
+#
+#      # Step 8: Verify Allure Results Directory
+#      - name: Verify Allure Results Directory
+#        run: |
+#          if [ ! -d "reports/allure-results" ]; then
+#            echo "Allure results directory not found!"
+#            exit 1
+#          else
+#            ls -la reports/allure-results
+#          fi
+#
+#      # Step 9: Generate the Allure report
+#      - name: Generate Allure Report
+#        run: |
+#          allure generate reports/allure-results --clean || echo "Allure report generation failed"
+#
+#      # Step 10: Upload Allure report as an artifact
+#      - name: Upload Allure Report
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: allure-report-${{ github.run_id }}
+#          path: reports/allure-results
+#
+#      # Step 11: Upload Playwright Screenshots for Debugging
+#      - name: Upload Playwright Screenshots
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
+#          path: failure_*.png
+
+
+
+
+
 
 name: CI Integration with Allure Reporting
 
@@ -50,14 +149,15 @@ jobs:
           pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=120000 -vv || true
         env:
           PYTHONUNBUFFERED: 1
+            
+            # Step 7: Capture Logs on Failure
+            - name: Capture Logs on Failure
+              if: ${{ failure() }}
+              run: |
+                echo "Capturing logs after failure..."
+#                cat /path/to/logs || echo "No additional logs found."
+                cat reports/allure-results || echo "No Allure results found."
 
-      # Step 7: Capture Logs on Failure
-      - name: Capture Logs on Failure
-        if: ${{ failure() }}
-        run: |
-          echo "Capturing logs after failure..."
-#          cat /path/to/logs || echo "No additional logs found."
-          cat reports/allure-results || echo "No Allure results found."
 
 
       # Step 8: Verify Allure Results Directory
