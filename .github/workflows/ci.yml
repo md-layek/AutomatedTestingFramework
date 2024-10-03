@@ -151,12 +151,14 @@ jobs:
           PYTHONUNBUFFERED: 1
 
       # Step 7: Capture Logs on Failure
+      # Step 7: Capture Logs on Failure
       - name: Capture Logs on Failure
-        if: failure()
+        if: ${{ failure() }}
         run: |
           echo "Capturing logs after failure..."
 #          cat /path/to/logs || echo "No additional logs found."
           cat reports/allure-results || echo "No Allure results found."
+
 
       # Step 8: Verify Allure Results Directory
       - name: Verify Allure Results Directory
