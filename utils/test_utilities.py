@@ -34,27 +34,6 @@ async def retry_action(action, retries=3, delay=2):
                 raise  # Re-raise the exception after max retries
 
 
-# Retry logic specifically for clicking elements
-# async def retry_click(page, selector: str, retries: int = 3, delay: int = 2):
-#     """
-#     A utility function to retry clicking an element a number of times with delays between retries.
-#     :param page: The Playwright page object.
-#     :param selector: The selector for the element to click.
-#     :param retries: The number of retries before failing.
-#     :param delay: The delay between retries (in seconds).
-#     :raises TimeoutError: If the element is not interactable after the maximum retries.
-#     """
-#     for attempt in range(retries):
-#         try:
-#             await page.click(selector)
-#             return  # Exit if the click succeeds
-#         except TimeoutError as e:
-#             print(f"Attempt {attempt + 1} failed to click '{selector}': {e}")
-#             if attempt < retries - 1:
-#                 await asyncio.sleep(delay)  # Wait before retrying
-#             else:
-#                 raise  # Re-raise the exception if maximum retries are reached
-
 
 
 async def retry_click(page, selector, retries=3, delay=2):
