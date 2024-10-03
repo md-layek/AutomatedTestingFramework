@@ -1,3 +1,83 @@
+#name: CI Integration with Allure Reporting
+#
+#on:
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
+#
+#jobs:
+#  test:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        browser: [chromium, firefox, webkit]  # Cross-browser testing
+#
+#    steps:
+#      # Step 1: Checkout the repository
+#      - name: Checkout Code
+#        uses: actions/checkout@v4
+#
+#      # Step 2: Set up Python
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.12.2'
+#
+#      # Step 3: Install dependencies
+#      - name: Install Dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install pytest pytest-playwright allure-pytest
+#          playwright install --with-deps  # Install Playwright browsers and dependencies
+#
+#      # Step 4: Clean up the Allure results directory before tests
+#      - name: Clean Allure Results Directory
+#        run: rm -rf reports/allure-results/*
+#
+#      # Step 5: Install Allure CLI
+#      - name: Install Allure CLI
+#        run: |
+#          python -m pip install allure-commandline
+#
+#      # Step 6: Run the tests and generate Allure results
+#      - name: Run Tests
+#        run: |
+#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=60000 -vv || true
+#        env:
+#          PYTHONUNBUFFERED: 1
+#
+#      # Step 7: Check the Allure Results Directory (for debugging purposes)
+#      - name: Check Allure Results
+#        run: |
+#          ls -la reports/allure-results || echo "No Allure results found."
+#
+#      # Step 8: Generate the Allure report (with retries in case of transient issues)
+#      - name: Generate Allure Report
+#        run: |
+#          allure generate reports/allure-results --clean || echo "Allure report generation failed"
+#
+#      # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs)
+#      - name: Upload Allure Report
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: allure-report-${{ matrix.browser }}-${{ github.sha }}
+#          path: reports/allure-results
+#
+#      # Step 10: Upload Playwright Screenshots for Debugging
+#      - name: Upload Playwright Screenshots
+#        if: ${{ always() }}  # Ensure this runs even if tests fail
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: playwright-screenshots-${{ matrix.browser }}-${{ github.sha }}
+#          path: failure_*.png
+
+
+
+
 name: CI Integration with Allure Reporting
 
 on:
@@ -16,17 +96,17 @@ jobs:
         browser: [chromium, firefox, webkit]  # Cross-browser testing
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout the repository (use v4)
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python
+      # Step 2: Set up Python (use v4)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.2'
 
-      # Step 3: Install dependencies
+      # Step 3: Install dependencies including Allure and Playwright through pip
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -35,42 +115,49 @@ jobs:
 
       # Step 4: Clean up the Allure results directory before tests
       - name: Clean Allure Results Directory
-        run: rm -rf reports/allure-results/*
-
-      # Step 5: Install Allure CLI
-      - name: Install Allure CLI
         run: |
-          python -m pip install allure-commandline
+          rm -rf reports/allure-results || true  # Remove the results directory if it exists
+          mkdir -p reports/allure-results        # Create an empty directory
+
+      # Step 5: Install Allure CLI (use Python to install)
+      - name: Install Allure CLI
+        run: python -m pip install allure-commandline
 
       # Step 6: Run the tests and generate Allure results
       - name: Run Tests
         run: |
-          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=60000 -vv || true
+          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=60000 -vv
         env:
           PYTHONUNBUFFERED: 1
+        continue-on-error: true  # Continue with other jobs even if one fails
 
-      # Step 7: Check the Allure Results Directory (for debugging purposes)
-      - name: Check Allure Results
+      # Step 7: Verify Allure Results Directory (for debugging purposes)
+      - name: Verify Allure Results Directory
         run: |
-          ls -la reports/allure-results || echo "No Allure results found."
+          if [ ! -d "reports/allure-results" ]; then
+            echo "Allure results directory not found!"
+            exit 1
+          else
+            echo "Allure results directory exists."
+          fi
 
-      # Step 8: Generate the Allure report (with retries in case of transient issues)
+      # Step 8: Generate the Allure report (if Allure results are found)
       - name: Generate Allure Report
         run: |
           allure generate reports/allure-results --clean || echo "Allure report generation failed"
 
-      # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs)
+      # Step 9: Upload Allure report as an artifact to GitHub Actions (always runs, use v4)
       - name: Upload Allure Report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report-${{ matrix.browser }}-${{ github.sha }}
-          path: reports/allure-results
+          name: allure-report-${{ github.run_id }}-${{ matrix.browser }}
+          path: reports/allure-results  # Upload the allure-results directory for downloading
 
-      # Step 10: Upload Playwright Screenshots for Debugging
+      # Step 10: Upload Playwright Screenshots for Debugging (always runs, use v4)
       - name: Upload Playwright Screenshots
         if: ${{ always() }}  # Ensure this runs even if tests fail
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-screenshots-${{ matrix.browser }}-${{ github.sha }}
-          path: failure_*.png
+          name: playwright-screenshots-${{ github.run_id }}-${{ matrix.browser }}
+          path: failure_*.png  # Upload any screenshots of failed tests

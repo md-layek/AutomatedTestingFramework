@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from utils.test_utilities import retry_action, retry_click, login, logout
 
 
-#
+
 # @pytest.mark.asyncio
 # async def test_user_login_success(page):
 #     """
@@ -52,8 +52,6 @@ async def test_user_login_success(page):
 
 
 
-#
-#
 # @pytest.mark.asyncio
 # async def test_user_login_failure(page):
 #     """

@@ -11,7 +11,7 @@ async def test_select_dropdown(page: Page):
     Test case to verify dropdown selection.
     """
     # Navigate to the dropdown page
-    await page.goto("http://the-internet.herokuapp.com/dropdown", timeout=60000)
+    await page.goto("http://the-internet.herokuapp.com/dropdown", timeout=120000)
 
     # Select an option and verify it was selected
     await page.select_option("#dropdown", "1")
