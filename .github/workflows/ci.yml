@@ -36,7 +36,7 @@
 #      - name: Install Dependencies
 #        run: |
 #          python -m pip install --upgrade pip
-#          pip install pytest pytest-playwright allure-pytest
+#          pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
 #          playwright install --with-deps
 #
 #      # Step 5: Install Allure CLI
@@ -48,26 +48,35 @@
 #      - name: Ensure Allure Results Directory
 #        run: mkdir -p reports/allure-results
 #
-#      # Step 7: Ensure logs directory exists
+#      # Step 7: Ensure Logs Directory exists
 #      - name: Ensure Logs Directory
 #        run: mkdir -p logs
 #
-#      # Step 8: Run the tests and generate Allure results
+#      # Step 8: Verify Allure Installation
+#      - name: Verify Allure Installation
+#        run: allure --version
+#
+#      # Step 9: Run the tests and generate Allure results
 #      - name: Run Tests
 #        run: |
-#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv || true
+#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv | tee logs/pytest_output.log
 #        env:
 #          PYTHONUNBUFFERED: 1
 #
-#      # Step 9: Capture Logs on Failure
+#      # Step 10: Debug Allure Results Directory
+#      - name: Debug Allure Results Directory
+#        run: ls -l reports/allure-results
+#
+#      # Step 11: Capture Logs on Failure
 #      - name: Capture Logs on Failure
 #        if: failure()
 #        run: |
 #          echo "Capturing logs after failure..."
 #          cat logs/logfile.log || echo "No additional logs found."
+#          cat logs/pytest_output.log || echo "No pytest output found."
 #          cat reports/allure-results || echo "No Allure results found."
 #
-#      # Step 10: Verify Allure Results Directory
+#      # Step 12: Verify Allure Results Directory
 #      - name: Verify Allure Results Directory
 #        run: |
 #          if [ ! -d "reports/allure-results" ]; then
@@ -77,12 +86,12 @@
 #            echo "Allure results directory exists."
 #          fi
 #
-#      # Step 11: Generate the Allure report
+#      # Step 13: Generate the Allure report
 #      - name: Generate Allure Report
 #        run: |
 #          allure generate reports/allure-results --clean || echo "Allure report generation failed"
 #
-#      # Step 12: Upload Allure report as an artifact
+#      # Step 14: Upload Allure report as an artifact
 #      - name: Upload Allure Report
 #        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
@@ -90,15 +99,21 @@
 #          name: allure-report-${{ matrix.browser }}-${{ github.run_id }}
 #          path: reports/allure-results
 #
-#      # Step 13: Upload Playwright Screenshots for Debugging
+#      # Step 15: Upload Playwright Screenshots for Debugging
 #      - name: Upload Playwright Screenshots
 #        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
 #        with:
 #          name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
 #          path: failure_*.png
-
-
+#
+#      # Step 16: Upload pytest logs for debugging
+#      - name: Upload Pytest Logs
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
+#          path: logs/pytest_output.log
 
 
 
@@ -140,7 +155,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-playwright allure-pytest
+          pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
           playwright install --with-deps
 
       # Step 5: Install Allure CLI
@@ -163,7 +178,7 @@ jobs:
       # Step 9: Run the tests and generate Allure results
       - name: Run Tests
         run: |
-          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv || true
+          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv | tee logs/pytest_output.log
         env:
           PYTHONUNBUFFERED: 1
 
@@ -176,7 +191,7 @@ jobs:
         if: failure()
         run: |
           echo "Capturing logs after failure..."
-          cat logs/logfile.log || echo "No additional logs found."
+          cat logs/pytest_output.log || echo "No pytest output found."
           cat reports/allure-results || echo "No Allure results found."
 
       # Step 12: Verify Allure Results Directory
@@ -210,6 +225,10 @@ jobs:
           name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
           path: failure_*.png
 
-
-
-
+      # Step 16: Upload pytest logs for debugging
+      - name: Upload Pytest Logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
+          path: logs/pytest_output.log
