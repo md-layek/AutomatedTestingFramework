@@ -60,7 +60,7 @@ jobs:
         if: failure()
         run: |
           echo "Capturing logs after failure..."
-#          cat /path/to/logs || echo "No additional logs found."
+          cat logs/logfile.log || echo "No additional logs found."
           cat reports/allure-results || echo "No Allure results found."
 
       # Step 9: Verify Allure Results Directory
