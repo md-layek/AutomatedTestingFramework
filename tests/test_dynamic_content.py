@@ -6,7 +6,7 @@ async def test_dynamic_content(page):
     Test case to verify dynamic content is loaded correctly.
     """
     # Navigate to the Dynamic Content page with increased timeout
-    await page.goto("http://the-internet.herokuapp.com/dynamic_content", timeout=60000)
+    await page.goto("http://the-internet.herokuapp.com/dynamic_content", timeout=120000)
 
     # Wait for the dynamic content to load
     await page.wait_for_selector(".large-10.columns", state="visible", timeout=60000)

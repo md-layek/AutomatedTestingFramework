@@ -50,10 +50,6 @@ async def test_user_login_success(page):
 
 
 
-
-
-
-
 @pytest.mark.asyncio
 async def test_user_login_failure(page):
     """
