@@ -14,78 +14,100 @@
 #    runs-on: ubuntu-latest
 #    strategy:
 #      matrix:
-#        browser: [chromium, firefox, webkit]
+#        browser: [chromium]  # Run only Chromium for debugging
 #
 #    steps:
+#      # Step 1: Checkout the repository
 #      - name: Checkout Code
 #        uses: actions/checkout@v4
 #
+#      # Step 2: Set up Node.js (use version 16 to avoid deprecation issues)
 #      - name: Setup Node.js
 #        uses: actions/setup-node@v4
 #        with:
-#          node-version: '20'
+#          node-version: '16'
 #
+#      # Step 3: Set up Python
 #      - name: Setup Python
 #        uses: actions/setup-python@v4
 #        with:
 #          python-version: '3.12.2'
 #
+#      # Step 4: Install dependencies including Allure and Playwright
 #      - name: Install Dependencies
 #        run: |
 #          python -m pip install --upgrade pip
 #          pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
-#          playwright install --with-deps
+#          npx playwright install --with-deps
 #
+#      # Step 5: Install Allure CLI
 #      - name: Install Allure CLI
 #        run: pip install allure-commandline
 #
+#      # Step 6: Ensure Allure Results Directory exists
 #      - name: Ensure Allure Results Directory
 #        run: mkdir -p reports/allure-results
 #
+#      # Step 7: Ensure Logs Directory exists
 #      - name: Ensure Logs Directory
 #        run: mkdir -p logs
 #
-#      - name: Verify Allure Installation
-#        run: allure --version
+#      # Step 8: Verify Playwright Installation
+#      - name: Verify Playwright Installation
+#        run: |
+#          npx playwright install --with-deps
+#          npx playwright --version
 #
+#      # Step 9: Run the tests and generate Allure results
 #      - name: Run Tests
 #        run: |
-#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=300000 -vv | tee logs/pytest_output.log
+#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv | tee logs/pytest_output.log
 #        env:
 #          PYTHONUNBUFFERED: 1
 #
-#      - name: List Allure Results Directory
+#      # Step 10: Debug Allure Results Directory
+#      - name: Debug Allure Results Directory
 #        run: ls -l reports/allure-results
 #
-#      - name: Verify Allure Results Directory Exists
-#        run: |
-#          if [ ! -d "reports/allure-results" ]; then
-#            echo "Allure results directory not found!"
-#            exit 1
-#          elif [ -z "$(ls -A reports/allure-results)" ]; then
-#            echo "Allure results directory is empty!"
-#            exit 1
-#          else
-#            echo "Allure results directory exists and contains files."
-#          fi
-#
-#      - name: Generate Allure Report
-#        run: allure generate reports/allure-results --clean || echo "Allure report generation failed"
-#
-#      - name: Upload Allure Results for Debugging
+#      # Step 11: Capture More Detailed Logs on Failure
+#      - name: Capture More Detailed Logs on Failure
 #        if: failure()
+#        run: |
+#          echo "Capturing detailed logs after failure..."
+#          cat logs/pytest_output.log || echo "No pytest output found."
+#          cat reports/allure-results || echo "No Allure results found."
+#          ls -l reports/allure-results || echo "Allure results directory not found."
+#          df -h || echo "Disk space information"  # Check runner resources
+#          free -m || echo "Memory information"  # Check memory usage on runner
+#
+#      # Step 12: Generate the Allure report
+#      - name: Generate Allure Report
+#        run: |
+#          allure generate reports/allure-results --clean || echo "Allure report generation failed"
+#
+#      # Step 13: Upload Allure report as an artifact
+#      - name: Upload Allure Report
+#        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
 #        with:
-#          name: allure-results-${{ github.run_id }}
+#          name: allure-report-${{ matrix.browser }}-${{ github.run_id }}
 #          path: reports/allure-results
 #
-#      - name: Upload Pytest Logs for Debugging
-#        if: failure()
+#      # Step 14: Upload Playwright Screenshots for Debugging
+#      - name: Upload Playwright Screenshots
+#        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
 #        with:
-#          name: pytest-logs-${{ github.run_id }}
+#          name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
+#          path: failure_*.png
+#
+#      # Step 15: Upload pytest logs for debugging
+#      - name: Upload Pytest Logs
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
 #          path: logs/pytest_output.log
-
 
 
 
@@ -105,35 +127,36 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        browser: [chromium]  # Run only Chromium for debugging
+        browser: [chromium, firefox, webkit]
 
     steps:
       # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js (use version 16 to avoid deprecation issues)
+      # Step 2: Set up Node.js (to avoid deprecation issues)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '16'  # Switch to Node 16 as GitHub Actions are forcing Node 20
 
       # Step 3: Set up Python
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.2'
 
-      # Step 4: Install dependencies including Allure and Playwright
+      # Step 4: Install dependencies including Allure
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
-          npx playwright install --with-deps
+          playwright install --with-deps
 
       # Step 5: Install Allure CLI
       - name: Install Allure CLI
-        run: pip install allure-commandline
+        run: |
+          pip install allure-commandline
 
       # Step 6: Ensure Allure Results Directory exists
       - name: Ensure Allure Results Directory
@@ -143,11 +166,9 @@ jobs:
       - name: Ensure Logs Directory
         run: mkdir -p logs
 
-      # Step 8: Verify Playwright Installation
-      - name: Verify Playwright Installation
-        run: |
-          npx playwright install --with-deps
-          npx playwright --version
+      # Step 8: Verify Allure Installation
+      - name: Verify Allure Installation
+        run: allure --version
 
       # Step 9: Run the tests and generate Allure results
       - name: Run Tests
@@ -158,25 +179,33 @@ jobs:
 
       # Step 10: Debug Allure Results Directory
       - name: Debug Allure Results Directory
-        run: ls -l reports/allure-results
+        run: |
+          ls -l reports/allure-results || echo "No allure results found"
 
-      # Step 11: Capture More Detailed Logs on Failure
-      - name: Capture More Detailed Logs on Failure
+      # Step 11: Capture Logs on Failure
+      - name: Capture Logs on Failure
         if: failure()
         run: |
-          echo "Capturing detailed logs after failure..."
+          echo "Capturing logs after failure..."
           cat logs/pytest_output.log || echo "No pytest output found."
           cat reports/allure-results || echo "No Allure results found."
-          ls -l reports/allure-results || echo "Allure results directory not found."
-          df -h || echo "Disk space information"  # Check runner resources
-          free -m || echo "Memory information"  # Check memory usage on runner
 
-      # Step 12: Generate the Allure report
+      # Step 12: Verify Allure Results Directory
+      - name: Verify Allure Results Directory
+        run: |
+          if [ ! -d "reports/allure-results" ]; then
+            echo "Allure results directory not found!"
+            exit 1
+          else
+            echo "Allure results directory exists."
+          fi
+
+      # Step 13: Generate the Allure report
       - name: Generate Allure Report
         run: |
           allure generate reports/allure-results --clean || echo "Allure report generation failed"
 
-      # Step 13: Upload Allure report as an artifact
+      # Step 14: Upload Allure report as an artifact
       - name: Upload Allure Report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -184,18 +213,10 @@ jobs:
           name: allure-report-${{ matrix.browser }}-${{ github.run_id }}
           path: reports/allure-results
 
-      # Step 14: Upload Playwright Screenshots for Debugging
+      # Step 15: Upload Playwright Screenshots for Debugging
       - name: Upload Playwright Screenshots
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
           path: failure_*.png
-
-      # Step 15: Upload pytest logs for debugging
-      - name: Upload Pytest Logs
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
-          path: logs/pytest_output.log
