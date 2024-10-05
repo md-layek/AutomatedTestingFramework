@@ -87,8 +87,6 @@
 #          path: logs/pytest_output.log
 
 
-
-
 name: CI Integration with Allure Reporting
 
 on:
@@ -126,11 +124,10 @@ jobs:
           pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
           playwright install --with-deps
 
-      - name: Install Allure CLI with Debug
+      - name: Install Allure CLI
         run: |
-          set -x  # Enable debug logging
           pip install allure-commandline
-          allure --version || echo "Allure CLI failed to install."
+          allure --version || echo "Allure CLI installation failed."
 
       - name: Ensure Allure Results Directory
         run: mkdir -p reports/allure-results
@@ -138,30 +135,28 @@ jobs:
       - name: Ensure Logs Directory
         run: mkdir -p logs
 
-      - name: Verify Allure Installation
-        run: allure --version
+      - name: Debug WebKit Installation
+        run: |
+          npx playwright install webkit
+          npx playwright --version
 
       - name: Run Tests
         run: |
-          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=300000 -vv | tee logs/pytest_output.log
+          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 3 --timeout=300000 -vv | tee logs/pytest_output.log
         env:
           PYTHONUNBUFFERED: 1
 
-      - name: Verify Allure Results Directory in CI
-        run: ls -alh reports/allure-results || echo "No Allure results directory found in CI."
+      - name: Debug Allure Results Directory
+        run: ls -l reports/allure-results
 
-      - name: Generate Allure Report
-        run: |
-          allure generate reports/allure-results --clean || echo "Allure report generation failed"
-
-      - name: Upload Allure Results for Debugging
+      - name: Upload Allure Report
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results-${{ github.run_id }}
+          name: allure-report-${{ matrix.browser }}-${{ github.run_id }}
           path: reports/allure-results
 
       - name: Upload Pytest Logs for Debugging
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-logs-${{ github.run_id }}
+          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
           path: logs/pytest_output.log
