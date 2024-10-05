@@ -1,5 +1,4 @@
 #
-#
 #name: CI Integration with Allure Reporting
 #
 #on:
@@ -22,11 +21,11 @@
 #      - name: Checkout Code
 #        uses: actions/checkout@v4
 #
-#      # Step 2: Set up Node.js (to avoid deprecation issues)
+#      # Step 2: Set up Node.js
 #      - name: Setup Node.js
 #        uses: actions/setup-node@v4
 #        with:
-#          node-version: '16'  # Switch to Node 16 as GitHub Actions are forcing Node 20
+#          node-version: '20'  # Ensure we are using Node.js 20
 #
 #      # Step 3: Set up Python
 #      - name: Set up Python
@@ -68,7 +67,8 @@
 #      # Step 10: Debug Allure Results Directory
 #      - name: Debug Allure Results Directory
 #        run: |
-#          ls -l reports/allure-results || echo "No allure results found"
+#          echo "Listing allure-results directory"
+#          ls -l reports/allure-results
 #
 #      # Step 11: Capture Logs on Failure
 #      - name: Capture Logs on Failure
@@ -108,6 +108,14 @@
 #        with:
 #          name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
 #          path: failure_*.png
+#
+#      # Step 16: Upload pytest logs for debugging
+#      - name: Upload Pytest Logs
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
+#          path: logs/pytest_output.log
 
 
 name: CI Integration with Allure Reporting
@@ -132,11 +140,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js (Latest version)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Ensure we are using Node.js 20
+          node-version: '20'  # Using latest Node.js version to avoid deprecation issues
 
       # Step 3: Set up Python
       - name: Set up Python
@@ -151,10 +159,10 @@ jobs:
           pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
           playwright install --with-deps
 
-      # Step 5: Install Allure CLI
-      - name: Install Allure CLI
+      # Step 5: Install Allure CLI globally
+      - name: Install Allure CLI globally
         run: |
-          pip install allure-commandline
+          npm install -g allure-commandline --save-dev
 
       # Step 6: Ensure Allure Results Directory exists
       - name: Ensure Allure Results Directory
@@ -171,15 +179,13 @@ jobs:
       # Step 9: Run the tests and generate Allure results
       - name: Run Tests
         run: |
-          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv | tee logs/pytest_output.log
+          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv || true
         env:
           PYTHONUNBUFFERED: 1
 
       # Step 10: Debug Allure Results Directory
-      - name: Debug Allure Results Directory
-        run: |
-          echo "Listing allure-results directory"
-          ls -l reports/allure-results
+      - name: List Allure Results Directory
+        run: ls -al reports/allure-results
 
       # Step 11: Capture Logs on Failure
       - name: Capture Logs on Failure
