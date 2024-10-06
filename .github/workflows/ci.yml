@@ -25,7 +25,7 @@
 #      - name: Setup Node.js
 #        uses: actions/setup-node@v4
 #        with:
-#          node-version: '20'  # Using latest Node.js version to avoid deprecation issues
+#          node-version: '20'
 #
 #      # Step 3: Set up Python
 #      - name: Set up Python
@@ -60,7 +60,7 @@
 #      # Step 9: Run the tests and generate Allure results
 #      - name: Run Tests
 #        run: |
-#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv || true
+#          pytest --alluredir=reports/allure-results --browser=${{ matrix.browser }} --reruns 2 --timeout=180000 -vv | tee logs/pytest_output.log
 #        env:
 #          PYTHONUNBUFFERED: 1
 #
@@ -91,7 +91,11 @@
 #        run: |
 #          allure generate reports/allure-results --clean || echo "Allure report generation failed"
 #
-#      # Step 14: Upload Allure report as an artifact
+#      # Step 14: Debug Allure Report Generation
+#      - name: Debug Allure Report Directory
+#        run: ls -al reports/allure-results
+#
+#      # Step 15: Upload Allure report as an artifact
 #      - name: Upload Allure Report
 #        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
@@ -99,7 +103,7 @@
 #          name: allure-report-${{ matrix.browser }}-${{ github.run_id }}
 #          path: reports/allure-results
 #
-#      # Step 15: Upload Playwright Screenshots for Debugging
+#      # Step 16: Upload Playwright Screenshots for Debugging
 #      - name: Upload Playwright Screenshots
 #        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
@@ -107,13 +111,14 @@
 #          name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
 #          path: failure_*.png
 #
-#      # Step 16: Upload pytest logs for debugging
+#      # Step 17: Upload pytest logs for debugging
 #      - name: Upload Pytest Logs
 #        if: ${{ always() }}
 #        uses: actions/upload-artifact@v4
 #        with:
 #          name: pytest-logs-${{ matrix.browser }}-${{ github.run_id }}
 #          path: logs/pytest_output.log
+
 
 
 
@@ -139,7 +144,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js (Latest version)
+      # Step 2: Set up Node.js (to avoid deprecation issues)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -158,10 +163,10 @@ jobs:
           pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
           playwright install --with-deps
 
-      # Step 5: Install Allure CLI globally
-      - name: Install Allure CLI globally
+      # Step 5: Install Allure CLI
+      - name: Install Allure CLI
         run: |
-          npm install -g allure-commandline --save-dev
+          pip install allure-commandline
 
       # Step 6: Ensure Allure Results Directory exists
       - name: Ensure Allure Results Directory
@@ -183,8 +188,8 @@ jobs:
           PYTHONUNBUFFERED: 1
 
       # Step 10: Debug Allure Results Directory
-      - name: List Allure Results Directory
-        run: ls -al reports/allure-results
+      - name: Debug Allure Results Directory
+        run: ls -l reports/allure-results
 
       # Step 11: Capture Logs on Failure
       - name: Capture Logs on Failure
@@ -209,19 +214,15 @@ jobs:
         run: |
           allure generate reports/allure-results --clean || echo "Allure report generation failed"
 
-      # Step 14: Debug Allure Report Generation
-      - name: Debug Allure Report Directory
-        run: ls -al reports/allure-results
-
-      # Step 15: Upload Allure report as an artifact
+      # Step 14: Upload Allure report as an artifact
       - name: Upload Allure Report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: allure-report-${{ matrix.browser }}-${{ github.run_id }}
-          path: reports/allure-results
+          path: allure-report
 
-      # Step 16: Upload Playwright Screenshots for Debugging
+      # Step 15: Upload Playwright Screenshots for Debugging
       - name: Upload Playwright Screenshots
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -229,7 +230,7 @@ jobs:
           name: playwright-screenshots-${{ matrix.browser }}-${{ github.run_id }}
           path: failure_*.png
 
-      # Step 17: Upload pytest logs for debugging
+      # Step 16: Upload pytest logs for debugging
       - name: Upload Pytest Logs
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
