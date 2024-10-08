@@ -38,6 +38,6 @@ async def set_global_timeout(page):
     try:
         if not page:
             raise ValueError("The page object is not initialized properly.")
-        await page.set_default_timeout(120000)  # 60 seconds timeout
+        await page.set_default_timeout(120000)  # 120 seconds timeout
     except Exception as e:
         print(f"Error setting global timeout: {e}")

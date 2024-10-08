@@ -34,8 +34,6 @@ async def retry_action(action, retries=3, delay=2):
                 raise  # Re-raise the exception after max retries
 
 
-
-
 async def retry_click(page, selector, retries=3, delay=2):
     """
     Retries clicking a selector up to 'retries' number of times, with 'delay' seconds between attempts.

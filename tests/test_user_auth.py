@@ -6,10 +6,8 @@ import os
 # Ensure the 'utils' directory is in the Python path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-# Import the reusable retry_action, login, and logout functions
+# Import the reusable retry_action, retry_click, login, and logout functions
 from utils.test_utilities import retry_action, retry_click, login, logout
-
 
 @pytest.mark.asyncio
 async def test_user_login_success(page):
@@ -23,12 +21,14 @@ async def test_user_login_success(page):
         # Perform the login
         await retry_action(lambda: login(page, "tomsmith", "SuperSecretPassword!"))
 
+        # Perform logout after login
+        await retry_action(lambda: logout(page))
+
     except Exception as e:
         # Capture screenshot and raise exception
         browser_name = page.context.browser.browser_type.name  # Correct browser name retrieval
         await page.screenshot(path=f"failure_{browser_name}_success.png")
         raise e
-
 
 @pytest.mark.asyncio
 async def test_user_login_failure(page):

@@ -10,7 +10,7 @@ async def test_file_upload(page):
     Test case to verify file upload functionality.
     """
     # Define the path to the file you want to upload
-    file_to_upload = os.path.abspath("tests/files/testfile.txt")  # Update with the actual file path
+    file_to_upload = os.path.abspath("tests/files/testfile.txt")
 
     async def navigate():
         # Navigate to the file upload page
