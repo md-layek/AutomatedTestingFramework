@@ -7,12 +7,11 @@ This project is an automated testing framework built using Playwright and pytest
 1. Project Overview
 2. Prerequisites
 3. Installation
-4. Project Structure
-5. Running Tests
-6. Github Actions Integration
-7. Troubleshooting
-8. Contributing
-9. License
+4. Running Tests
+5. Github Actions Integration
+6. Troubleshooting
+7. Contributing
+8. License
 
 
 ## Project Overview
@@ -31,7 +30,6 @@ CI Integration: Runs tests on push and pull requests using GitHub Actions.
 Before you begin, ensure that you have the following installed on your system:
 
 - **Python 3.12+**
-- **Node.js** (v20.x.x or higher)
 - **pip** (Python package manager)
 - **Allure CLI** for generating test reports
 
@@ -93,45 +91,7 @@ View Allure Report: After running the tests, generate the Allure report:
 
 `allure open`
 
-## Project Structure
-`
-AutomatedTestingFramework/
-│
-├── .github/
-│   └── workflows/
-│       └── ci.yml                # CI configuration for GitHub Actions
-│
-├── .venv/                         # Virtual environment directory (not part of version control)
-│
-├── logs/                          # Log files generated during test runs
-│
-├── reports/
-│   └── allure-results/            # Allure test reports generated after the tests
-│
-├── tests/
-│   ├── files/
-│   │   └── testfile.txt           # Example test file for file upload
-│   ├── conftest.py                # Pytest configuration and fixtures
-│   ├── test_ci_integration.py     # Test case for CI integration
-│   ├── test_cross_browser.py      # Test cases for cross-browser testing
-│   ├── test_dropdown_and_alerts.py# Test cases for dropdowns and JavaScript alerts
-│   ├── test_dynamic_content.py    # Test case for dynamic content page
-│   ├── test_file_upload.py        # Test case for file upload
-│   ├── test_user_auth.py          # Test cases for user authentication (login)
-│
-├── utils/
-│   ├── __init__.py                # Init file for utils module
-│   └── test_utilities.py          # Utility functions like retry actions, login, etc.
-│
-├── .gitignore                     # Files and directories to ignore in version control
-├── failure_firefox_success.png    # Screenshot taken on Firefox during a successful login
-├── failure_javascript_alert_chromium.png  # Screenshot taken on Chromium during JavaScript alert test
-├── failure_login_chromium.png     # Screenshot taken on login failure in Chromium
-├── failure_login_firefox.png      # Screenshot taken on login failure in Firefox
-├── pytest.ini                     # Pytest configuration file
-├── README.md                      # Project documentation
-├── requirements.txt               # Python dependencies
-`
+
 
 ## Running Tests Locally
 
@@ -157,10 +117,12 @@ Running Tests in Specific Browsers
 To run tests in a specific browser, update the --browser option. For example, to run tests in Firefox:
 
 pytest --alluredir=reports/allure-results --browser=firefox --reruns 2 --timeout=180000 -vv
+
 Viewing Allure Reports
 After running the tests, generate and view the Allure report with:
 
-allure serve reports/allure-results
+`allure serve reports/allure-results`
+
 This command will start a local server and open the Allure report in your browser.
 
 ## GitHub Actions Integration
@@ -207,7 +169,6 @@ Tests should follow the structure and conventions used in the existing tests.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License.
 
-This version of the `README.md` is complete and detailed, covering the setup, running 
 
