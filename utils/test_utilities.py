@@ -10,9 +10,29 @@ async def login(page, username, password):
     return True  # Return True to indicate success
 
 
+# async def logout(page):
+#     await page.click("a[href='/logout']")
+#     return True  # Return True to indicate success
+
+
 async def logout(page):
-    await page.click("a[href='/logout']")
-    return True  # Return True to indicate success
+    try:
+        await page.wait_for_load_state("networkidle", timeout=30000)
+        logout_link = page.locator("a[href='/logout']")
+        if await logout_link.is_visible():
+            await logout_link.click()
+            print("Logout successful.")
+    except Exception as e:
+        print(f"Logout failed: {e}. Retrying with JavaScript.")
+        try:
+            await page.evaluate("""
+                document.querySelector("a[href='/logout']")?.click();
+            """)
+            print("Logout performed using JavaScript.")
+        except Exception as js_error:
+            print(f"JavaScript click failed: {js_error}")
+            await page.screenshot(path="logs/logout_failure_screenshot.png")
+            raise
 
 async def retry_action(action, retries=3, delay=2):
     """
