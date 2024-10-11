@@ -1,8 +1,10 @@
 # End-User Interaction Tests
 
+import os
 import pytest
 from playwright.async_api import Page
 
+logs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'logs')
 alert_message = None  # Define a global variable for the alert message
 
 # Test to verify dropdown selection
@@ -45,7 +47,8 @@ async def test_javascript_alerts(page: Page):
     except Exception as e:
         # Take a screenshot on failure (increase screenshot timeout)
         browser_name = page.context.browser.browser_type.name
-        await page.screenshot(path=f"failure_javascript_alert_{browser_name}.png", timeout=60000)
+        screenshot_path = os.path.join(logs_dir, f"failure_javascript_alert_{browser_name}.png")
+        await page.screenshot(path=screenshot_path, timeout=60000)
         raise e
 
 async def handle_dialog(dialog):
@@ -55,10 +58,6 @@ async def handle_dialog(dialog):
     global alert_message
     alert_message = dialog.message
     await dialog.accept()
-
-
-
-
 
 
 
