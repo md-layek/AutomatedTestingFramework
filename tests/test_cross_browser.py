@@ -3,7 +3,6 @@
 import pytest
 from playwright.async_api import TimeoutError
 
-
 @pytest.mark.asyncio
 async def test_cross_browser(page):
     """

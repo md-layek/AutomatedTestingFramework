@@ -1,5 +1,4 @@
 # End-User Interaction Tests
-
 import os
 import pytest
 from playwright.async_api import Page
