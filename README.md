@@ -13,17 +13,15 @@ This project is an automated testing framework built using Playwright and pytest
 7. Contributing
 8. License
 
-
 ## Project Overview
 
 This project aims to automate testing of web applications across multiple browsers using Playwright. It provides reliable retry mechanisms, logs, and failure screenshots for easier debugging. The framework supports continuous integration with GitHub Actions, and test results are visualized using Allure Reports.
 
 Key Features:
-Cross-browser testing: Support for Chromium, Firefox, and WebKit browsers.
-Allure reporting: Comprehensive test reports with failure screenshots.
-Retry Mechanism: Automated retries on failures to handle flaky tests.
-CI Integration: Runs tests on push and pull requests using GitHub Actions.
-
+- Cross-browser testing: Support for Chromium, Firefox, and WebKit browsers.
+- Allure reporting: Comprehensive test reports with failure screenshots.
+- Retry Mechanism: Automated retries on failures to handle flaky tests.
+- CI Integration: Runs tests on push and pull requests using GitHub Actions.
 
 ## Prerequisites
 
@@ -33,142 +31,155 @@ Before you begin, ensure that you have the following installed on your system:
 - **pip** (Python package manager)
 - **Allure CLI** for generating test reports
 
-
 ## Installation
 
 To install and set up the project, follow these steps:
 
 Clone the repository:
 
+```
 git clone https://github.com/yourusername/automated-testing-framework.git
-
 cd automated-testing-framework
+```
 
 Create a virtual environment:
 
-`python -m venv .venv
-`
+```
+python -m venv .venv
+```
 
-`source .venv/bin/activate`  # On Windows: .venv\Scripts\activate
+Activate the virtual environment:
+
+```
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
 
 Install dependencies:
 
-`pip install --upgrade pip`
+```
+pip install --upgrade pip
+pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
+playwright install --with-deps
+```
 
-`pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout`
+Or install dependencies by running:
 
-`playwright install --with-deps`
+```
+pip install -r requirements.txt
+```
 
-or you can install dependencies by running this command
+Set up Playwright by installing the required browsers:
 
-`pip install -r requirements.txt`
-
-Set up Playwright: Install the required browsers by running:
-`playwright install`
+```
+playwright install
+```
 
 Install Allure CLI:
-`pip install allure-commandline`
 
-Running Tests
-Basic Test Run: You can run all tests using:
-`pytest`
+```
+pip install allure-pytest
+```
 
-Run Cross-browser Tests: You can specify the browser to run the tests:
+## Running Tests
 
-`pytest --browser=chromium`
+### Basic Test Run
 
-`pytest --browser=firefox`
+To run all tests:
 
-`pytest --browser=webkit`
+```
+pytest
+```
 
-Run with Allure Report Generation: To run tests and generate Allure reports:
+### Run Cross-browser Tests
 
-`pytest --alluredir=reports/allure-results`
+Specify the browser to run the tests:
 
-View Allure Report: After running the tests, generate the Allure report:
+```
+pytest --browser=chromium
+pytest --browser=firefox
+pytest --browser=webkit
+```
 
-`allure generate reports/allure-results --clean`
+### Run with Allure Report Generation
 
-`allure open`
+To run tests and generate Allure reports:
 
+```
+pytest --alluredir=reports/allure-results
+```
 
+### Viewing Allure Reports
+
+After running the tests, generate and view the Allure report with:
+
+```
+allure serve reports/allure-results
+```
 
 ## Running Tests Locally
 
-Running the Full Test Suite
 To run the full test suite across all supported browsers (Chromium, Firefox, WebKit), use the following command:
 
-`pytest --alluredir=reports/allure-results --browser=chromium --reruns 2 --timeout=180000 -vv
-`
+```
+pytest --alluredir=reports/allure-results --browser=chromium --reruns 2 --timeout=180000 -vv
+```
 
-Command Breakdown:
+### Command Breakdown:
 
---alluredir=reports/allure-results: Specifies the directory where Allure will store test results.
-
---browser=chromium: Run the tests in the Chromium browser (can be changed to firefox or webkit).
-
---reruns 2: Retry any failed tests up to 2 times.
-
---timeout=180000: Set a timeout for each test.
-
--vv: Verbose mode for more detailed test output.
-
-Running Tests in Specific Browsers
-To run tests in a specific browser, update the --browser option. For example, to run tests in Firefox:
-
-pytest --alluredir=reports/allure-results --browser=firefox --reruns 2 --timeout=180000 -vv
-
-Viewing Allure Reports
-After running the tests, generate and view the Allure report with:
-
-`allure serve reports/allure-results`
-
-This command will start a local server and open the Allure report in your browser.
+- `--alluredir=reports/allure-results`: Specifies the directory where Allure will store test results.
+- `--browser=chromium`: Run the tests in the Chromium browser (can be changed to firefox or webkit).
+- `--reruns 2`: Retry any failed tests up to 2 times.
+- `--timeout=180000`: Set a timeout for each test.
+- `-vv`: Verbose mode for more detailed test output.
 
 ## GitHub Actions Integration
 
 This project is integrated with GitHub Actions for continuous integration. The tests run automatically on every push to the main branch or when a pull request is opened.
 
-CI Features
-Multiple Browsers: Tests run on Chromium, Firefox, and WebKit.
-Allure Reports: Generated after the test run and uploaded as artifacts.
-Automatic Retries: Failed tests are retried up to 2 times.
+### CI Features
 
+- **Multiple Browsers**: Tests run on Chromium, Firefox, and WebKit.
+- **Allure Reports**: Generated after the test run and uploaded as artifacts.
+- **Automatic Retries**: Failed tests are retried up to 2 times.
 
 ## Troubleshooting
 
-Common Issues
-Allure Reports Not Generating:
+### Common Issues
 
-Ensure Allure is installed correctly and referenced in the test command.
-Verify the --alluredir option is set.
+**Allure Reports Not Generating**:
+- Ensure Allure is installed correctly and referenced in the test command.
+- Verify the `--alluredir` option is set.
 
-Timeouts:
-Increase the timeout value if tests are failing due to timeouts. For example:
+**Timeouts**:
+- Increase the timeout value if tests are failing due to timeouts. For example:
 
+```
 pytest --timeout=240000
+```
 
-GitHub Actions Failures:
-Check the logs in the Actions tab for detailed error messages.
+**GitHub Actions Failures**:
+- Check the logs in the Actions tab for detailed error messages.
 
 ## Contributing
 
-We welcome contributions to this project. To contribute:
+I welcome contributions to this project. To contribute:
 
-Fork this repository.
-Create a new branch (git checkout -b feature-branch).
-Make your changes and commit them (git commit -m 'Add some feature').
-Push to the branch (git push origin feature-branch).
-Open a pull request.
+1. Fork this repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
 
-Code Style
+### Code Style
+
 Ensure all Python code is formatted with black. You can run:
+
+```
 black .
+```
 
 Tests should follow the structure and conventions used in the existing tests.
 
 ## License
 
 This project is licensed under the MIT License.
-
-
