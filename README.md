@@ -1,6 +1,6 @@
 # Automated Testing Framework
 
-This project is an automated testing framework built using Playwright and pytest, designed for cross-browser testing and comprehensive report generation using Allure.
+This project is an automated testing framework built using Playwright and pytest, designed for cross-browser and cross-platform testing and comprehensive report generation using Allure.
 
 ## Table of Contents
 
@@ -15,11 +15,12 @@ This project is an automated testing framework built using Playwright and pytest
 
 ## Project Overview
 
-This project aims to automate testing of web applications across multiple browsers using Playwright. It provides reliable retry mechanisms, logs, and failure screenshots for easier debugging. The framework supports continuous integration with GitHub Actions, and test results are visualized using Allure Reports.
+This project aims to automate testing of web applications across multiple browsers and operating systems using Playwright. It provides reliable retry mechanisms, logs, and failure screenshots for easier debugging. The framework supports continuous integration with GitHub Actions, and test results are visualized using Allure Reports.
 
 Key Features:
 - Cross-browser testing: Support for Chromium, Firefox, and WebKit browsers.
-- Allure reporting: Comprehensive test reports with failure screenshots.
+- Cross-platform support: Can run tests on Windows, macOS, and Linux.
+- Allure reporting: Comprehensive test reports with detailed information.
 - Retry Mechanism: Automated retries on failures to handle flaky tests.
 - CI Integration: Runs tests on push and pull requests using GitHub Actions.
 
@@ -33,7 +34,9 @@ Before you begin, ensure that you have the following installed on your system:
 
 ## Installation
 
-To install and set up the project, follow these steps:
+### Windows
+
+To install and set up the project on Windows, follow these steps:
 
 Clone the repository:
 
@@ -51,7 +54,56 @@ python -m venv .venv
 Activate the virtual environment:
 
 ```
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+.venv\Scripts\activate
+```
+
+Install dependencies:
+
+```
+pip install --upgrade pip
+pip install pytest pytest-playwright allure-pytest pytest-rerunfailures pytest-timeout
+playwright install --with-deps
+```
+
+Or install dependencies by running:
+
+```
+pip install -r requirements.txt
+```
+
+Set up Playwright by installing the required browsers:
+
+```
+playwright install
+```
+
+Install Allure CLI:
+
+```
+pip install allure-pytest
+```
+
+### macOS/Linux
+
+To install and set up the project on macOS/Linux, follow these steps:
+
+Clone the repository:
+
+```
+git clone https://github.com/yourusername/automated-testing-framework.git
+cd automated-testing-framework
+```
+
+Create a virtual environment:
+
+```
+python3 -m venv .venv
+```
+
+Activate the virtual environment:
+
+```
+source .venv/bin/activate
 ```
 
 Install dependencies:
@@ -139,6 +191,7 @@ This project is integrated with GitHub Actions for continuous integration. The t
 ### CI Features
 
 - **Multiple Browsers**: Tests run on Chromium, Firefox, and WebKit.
+- **Cross-platform Testing**: Tests run on Ubuntu (Linux), macOS, and Windows runners.
 - **Allure Reports**: Generated after the test run and uploaded as artifacts.
 - **Automatic Retries**: Failed tests are retried up to 2 times.
 
@@ -162,7 +215,7 @@ pytest --timeout=240000
 
 ## Contributing
 
-I welcome contributions to this project. To contribute:
+We welcome contributions to this project. To contribute:
 
 1. Fork this repository.
 2. Create a new branch (`git checkout -b feature-branch`).
