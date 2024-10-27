@@ -1,8 +1,0 @@
-pytest
-pytest-playwright
-allure-pytest
-pytest-xdist
-pytest-asyncio
-playwright
-pytest-rerunfailures
-pytest-timeout
